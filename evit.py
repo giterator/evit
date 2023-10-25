@@ -205,19 +205,34 @@ class Attention(nn.Module):
         x = self.proj_drop(x)
 
         left_tokens = N - 1
+
         if self.keep_rate < 1 and keep_rate < 1 or tokens is not None:  # double check the keep rate
+            torch.cuda.nvtx.range_push("EViTInAttention")
+
             left_tokens = math.ceil(keep_rate * (N - 1))
             if tokens is not None:
                 left_tokens = tokens
             if left_tokens == N - 1:
                 return x, None, None, None, left_tokens
             assert left_tokens >= 1
+
+            torch.cuda.nvtx.range_push("slice_cls_attn")
             cls_attn = attn[:, :, 0, 1:]  # [B, H, N-1]
+            torch.cuda.nvtx.range_pop()
+
+            torch.cuda.nvtx.range_push("mean_cls_attn")
             cls_attn = cls_attn.mean(dim=1)  # [B, N-1]
+            torch.cuda.nvtx.range_pop()
+
+            torch.cuda.nvtx.range_push("TopK")
             _, idx = torch.topk(cls_attn, left_tokens, dim=1, largest=True, sorted=True)  # [B, left_tokens]
+            torch.cuda.nvtx.range_pop()
+
             # cls_idx = torch.zeros(B, 1, dtype=idx.dtype, device=idx.device)
             # index = torch.cat([cls_idx, idx + 1], dim=1)
             index = idx.unsqueeze(-1).expand(-1, -1, C)  # [B, left_tokens, C]
+
+            torch.cuda.nvtx.range_pop()
 
             return x, index, idx, cls_attn, left_tokens
 
