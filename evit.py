@@ -207,7 +207,7 @@ class Attention(nn.Module):
         left_tokens = N - 1
 
         if self.keep_rate < 1 and keep_rate < 1 or tokens is not None:  # double check the keep rate
-            torch.cuda.nvtx.range_push("EViTInAttention")
+            torch.cuda.nvtx.range_push("TokenReduction")
 
             left_tokens = math.ceil(keep_rate * (N - 1))
             if tokens is not None:
