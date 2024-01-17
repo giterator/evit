@@ -212,10 +212,10 @@ def main(args):
 
     cudnn.benchmark = True
 
-    dataset_train, args.nb_classes = build_dataset(is_train=True, args=args)
-    dataset_val, _ = build_dataset(is_train=False, args=args)
+    #dataset_train, args.nb_classes = build_dataset(is_train=True, args=args)
+    #dataset_val, _ = build_dataset(is_train=False, args=args)
 
-    if True:  # args.distributed:
+    if False: #True:  # args.distributed:
         num_tasks = utils.get_world_size()
         global_rank = utils.get_rank()
         if args.repeated_aug:
@@ -239,29 +239,29 @@ def main(args):
     #     sampler_train = torch.utils.data.RandomSampler(dataset_train)
     #     sampler_val = torch.utils.data.SequentialSampler(dataset_val)
 
-    data_loader_train = torch.utils.data.DataLoader(
-        dataset_train, sampler=sampler_train,
-        batch_size=args.batch_size,
-        num_workers=args.num_workers,
-        pin_memory=args.pin_mem,
-        drop_last=True,
-    )
+    #data_loader_train = torch.utils.data.DataLoader(
+    #    dataset_train, sampler=sampler_train,
+    #    batch_size=args.batch_size,
+    #    num_workers=args.num_workers,
+    #    pin_memory=args.pin_mem,
+    #    drop_last=True,
+    #)
 
-    data_loader_val = torch.utils.data.DataLoader(
-        dataset_val, sampler=sampler_val,
-        batch_size=int(1.5 * args.batch_size),
-        num_workers=args.num_workers,
-        pin_memory=args.pin_mem,
-        drop_last=False
-    )
+    #data_loader_val = torch.utils.data.DataLoader(
+    #    dataset_val, sampler=sampler_val,
+    #    batch_size=int(1.5 * args.batch_size),
+    #    num_workers=args.num_workers,
+    #    pin_memory=args.pin_mem,
+    #    drop_last=False
+    #)
 
-    mixup_fn = None
-    mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
-    if mixup_active:
-        mixup_fn = Mixup(
-            mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
-            prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
-            label_smoothing=args.smoothing, num_classes=args.nb_classes)
+    #mixup_fn = None
+    #mixup_active = args.mixup > 0 or args.cutmix > 0. or args.cutmix_minmax is not None
+    #if mixup_active:
+    #    mixup_fn = Mixup(
+    #        mixup_alpha=args.mixup, cutmix_alpha=args.cutmix, cutmix_minmax=args.cutmix_minmax,
+    #        prob=args.mixup_prob, switch_prob=args.mixup_switch_prob, mode=args.mixup_mode,
+    #        label_smoothing=args.smoothing, num_classes=args.nb_classes)
 
     print(f"Creating model: {args.model}")
     model = create_model(
@@ -269,7 +269,7 @@ def main(args):
         base_keep_rate=args.base_keep_rate,
         drop_loc=eval(args.drop_loc),
         pretrained=False,
-        num_classes=args.nb_classes,
+        num_classes=1000,#args.nb_classes,
         drop_rate=args.drop,
         drop_path_rate=args.drop_path,
         drop_block_rate=None,
