@@ -58,6 +58,12 @@ def _cfg(url='', **kwargs):
 
 
 default_cfgs = {
+#############################FYP################################################
+    #'vit_large_patch16_224': _cfg(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD, first_conv=??? ),
+    'lvvit_s': _cfg(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD, first_conv="patch_embed.conv1"),
+    'lvvit_m': _cfg(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD, crop_pct=1.0, first_conv="patch_embed.conv1"),
+    #'lvvit_l': _cfg(mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD, crop_pct=1.0, first_conv="patch_embed.conv1", input_size=(3, 288, 288)),
+################################################################################
     'deit_small_patch16_304': _cfg(
         mean=IMAGENET_DEFAULT_MEAN, std=IMAGENET_DEFAULT_STD,
         input_size=(3, 304, 304)),
@@ -671,6 +677,54 @@ def deit_small_patch16_224(pretrained=False, **kwargs):
     model = _create_evit('deit_small_patch16_224', pretrained=pretrained, **model_kwargs)
     return model
 
+#####################################################################################
+######################################## FYP MODELS #################################
+#####################################################################################
+# LV-ViT S
+@register_model
+def lvvit_s_shrink_base(pretrained=False, base_keep_rate=0.7, drop_loc=(4, 8, 12), **kwargs):
+    keep_rate = [1] * 16
+    for loc in drop_loc:
+        keep_rate[loc] = base_keep_rate
+    model_kwargs = dict(patch_size=16, embed_dim=384, depth=16, num_heads=6, keep_rate=keep_rate)
+    model_kwargs.update(kwargs)
+    model = _create_evit('lvvit_s', pretrained=pretrained, **model_kwargs)
+    return model
+
+# LV-ViT M
+@register_model
+def lvvit_m_shrink_base(pretrained=False, base_keep_rate=0.7, drop_loc=(4, 8, 12), **kwargs):
+    keep_rate = [1] * 20
+    for loc in drop_loc:
+        keep_rate[loc] = base_keep_rate
+    model_kwargs = dict(patch_size=16, embed_dim=512, depth=20, num_heads=8, keep_rate=keep_rate)
+    model_kwargs.update(kwargs)
+    model = _create_evit('lvvit_m', pretrained=pretrained, **model_kwargs)
+    return model
+
+## LV-ViT L
+#@register_model
+#def lvvit_l_shrink_base(pretrained=False, base_keep_rate=0.7, drop_loc=(4, 8, 12), **kwargs):
+#    keep_rate = [1] * 24
+#    for loc in drop_loc:
+#        keep_rate[loc] = base_keep_rate
+#    model_kwargs = dict(patch_size=16, embed_dim=768, depth=24, num_heads=12, keep_rate=keep_rate)
+#    model_kwargs.update(kwargs)
+#    model = _create_evit('lvvit_l', pretrained=pretrained, **model_kwargs)
+#    return model
+
+# ViT L
+#@register_model
+#def vit_large_patch16_shrink_base(pretrained=False, base_keep_rate=0.7, drop_loc=(), **kwargs):
+#    keep_rate = [1] * 24
+#    for loc in drop_loc:
+#        keep_rate[loc] = base_keep_rate
+#    model_kwargs = dict(patch_size=16, embed_dim=1024, depth=24, num_heads=16, keep_rate=keep_rate)
+#    model_kwargs.update(kwargs)
+#    model = _create_evit('vit_large_patch16_224', pretrained=pretrained, **model_kwargs)
+#    return model
+
+######################################################################################################
 
 # -------------------------------------------------------------
 # EViT prototype models
